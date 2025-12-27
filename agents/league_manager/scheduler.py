@@ -8,9 +8,19 @@ class RoundRobinScheduler:
     """Generates round-robin tournament schedule."""
     
     def generate_schedule(self, player_ids: List[str]) -> Dict[int, List[Dict]]:
-        """Generate round-robin schedule.
+        """Generate round-robin tournament schedule.
         
-        Returns dictionary mapping round_id to list of matches.
+        Args:
+            player_ids: List of player IDs to schedule matches for
+            
+        Returns:
+            Dictionary mapping round_id (int) to list of match dictionaries.
+            Each match dict contains: match_id, game_type, player_A_id, player_B_id
+            
+        Algorithm:
+        - Generates all possible player pairs using combinations
+        - Distributes pairs across rounds to ensure fair scheduling
+        - For n players: (n-1) rounds if n is even, n rounds if n is odd
         """
         n = len(player_ids)
         if n < 2:
