@@ -2,7 +2,7 @@
 
 from typing import Dict, Optional
 import httpx
-from league_sdk import Message, create_message
+from league_sdk import Message, create_message, ErrorCode, create_error_message
 
 
 class MessageHandler:
@@ -57,7 +57,14 @@ class MessageHandler:
         )
     
     async def handle_player_register(self, message: Message) -> Message:
-        """Handle player registration."""
+        """Handle player registration request.
+        
+        Args:
+            message: LEAGUE_REGISTER_REQUEST with player_meta
+            
+        Returns:
+            LEAGUE_REGISTER_RESPONSE with status, player_id, and auth_token
+        """
         player_meta = getattr(message, "player_meta", {})
         player_id = f"P{len(self.manager.registered_players) + 1:02d}"
         
@@ -85,7 +92,16 @@ class MessageHandler:
         )
     
     async def handle_match_result(self, message: Message) -> Message:
-        """Handle match result report."""
+        """Handle match result report from referee.
+        
+        Args:
+            message: MATCH_RESULT_REPORT with match_id, round_id, and result
+            
+        Returns:
+            MATCH_RESULT_ACK confirming result was recorded
+            
+        Updates standings, sends standings update to players, and checks round completion.
+        """
         match_id = message.match_id
         result = getattr(message, "result", {})
         
@@ -123,18 +139,31 @@ class MessageHandler:
         )
     
     async def handle_league_query(self, message: Message) -> Message:
-        """Handle league query."""
+        """Handle league query from authenticated player.
+        
+        Args:
+            message: LEAGUE_QUERY with auth_token, league_id, query_type, and query_params
+            
+        Returns:
+            LEAGUE_QUERY_RESPONSE with requested data or LEAGUE_ERROR if auth fails
+            
+        Supported query types:
+        - GET_STANDINGS: Returns current league standings
+        - GET_NEXT_MATCH: Returns next match for the querying player
+        """
         # Validate auth token
         auth_token = getattr(message, "auth_token")
         sender_id = message.sender.split(":")[-1] if ":" in message.sender else message.sender
         
         if not auth_token or not self.manager.validate_auth_token(sender_id, auth_token):
+            error_info = create_error_message(ErrorCode.E012, "LEAGUE_QUERY", {"provided_token": auth_token})
             return create_message(
                 "LEAGUE_ERROR",
                 "league_manager",
-                error_code="E012",
-                error_description="AUTH_TOKEN_INVALID",
-                original_message_type="LEAGUE_QUERY",
+                error_code=error_info["error_code"],
+                error_description=error_info["error_description"],
+                original_message_type=error_info["original_message_type"],
+                context=error_info["context"],
                 conversation_id=message.conversation_id,
             )
         
@@ -179,7 +208,16 @@ class MessageHandler:
         )
     
     async def handle_start_league(self, message: Message) -> Message:
-        """Handle league start request."""
+        """Handle league start request.
+        
+        Args:
+            message: START_LEAGUE message with league_id
+            
+        Returns:
+            LEAGUE_STATUS with current league state or LEAGUE_ERROR if insufficient players
+            
+        Initializes standings, generates schedule, and announces first round.
+        """
         if self.manager.league_started:
             return create_message(
                 "LEAGUE_STATUS",
@@ -195,11 +233,14 @@ class MessageHandler:
         # Start league with all registered players
         player_ids = list(self.manager.registered_players.keys())
         if len(player_ids) < 2:
+            error_info = create_error_message(ErrorCode.E005, "START_LEAGUE")
             return create_message(
                 "LEAGUE_ERROR",
                 "league_manager",
-                error_code="E005",
-                error_description="NOT_ENOUGH_PLAYERS",
+                error_code=error_info["error_code"],
+                error_description=error_info["error_description"],
+                original_message_type=error_info["original_message_type"],
+                context={"registered_players": len(player_ids), "required": 2},
                 conversation_id=message.conversation_id,
             )
         
@@ -223,13 +264,25 @@ class MessageHandler:
         """Announce a new round."""
         matches = self.manager.matches_by_round.get(round_id, [])
         
-        # Assign referees to matches
+        # Assign referees to matches and include player endpoints
         referee_ids = list(self.manager.registered_referees.keys())
         for i, match in enumerate(matches):
             if referee_ids:
                 referee_id = referee_ids[i % len(referee_ids)]
                 referee = self.manager.registered_referees[referee_id]
                 match["referee_endpoint"] = referee.contact_endpoint
+            
+            # Add player endpoints from registered players
+            player_A_id = match.get("player_A_id")
+            player_B_id = match.get("player_B_id")
+            
+            if player_A_id and player_A_id in self.manager.registered_players:
+                player_A_config = self.manager.registered_players[player_A_id]
+                match["player_A_endpoint"] = player_A_config.contact_endpoint
+            
+            if player_B_id and player_B_id in self.manager.registered_players:
+                player_B_config = self.manager.registered_players[player_B_id]
+                match["player_B_endpoint"] = player_B_config.contact_endpoint
         
         # Create ROUND_ANNOUNCEMENT message
         announcement = create_message(
