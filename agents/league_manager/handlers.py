@@ -3,6 +3,7 @@
 from typing import Dict, Optional
 import httpx
 from league_sdk import Message, create_message, ErrorCode, create_error_message
+from league_sdk.retry import send_message_with_retry
 
 
 class MessageHandler:
@@ -293,39 +294,39 @@ class MessageHandler:
             matches=matches,
         )
         
-        # Send to all referees
+        # Send to all referees with retry logic
         async with httpx.AsyncClient(timeout=10.0) as client:
+            message_payload = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "handle_message",
+                "params": {"message": announcement.to_dict()},
+            }
             for referee_id, referee_config in self.manager.registered_referees.items():
-                try:
-                    await client.post(
-                        referee_config.contact_endpoint,
-                        json={
-                            "jsonrpc": "2.0",
-                            "id": 1,
-                            "method": "handle_message",
-                            "params": {"message": announcement.to_dict()},
-                        },
-                    )
+                response = await send_message_with_retry(
+                    client, referee_config.contact_endpoint, message_payload, max_retries=3
+                )
+                if response:
                     self.logger.info(f"Sent ROUND_ANNOUNCEMENT to {referee_id}")
-                except Exception as e:
-                    self.logger.error(f"Failed to send to {referee_id}: {e}")
+                else:
+                    self.logger.error(f"Failed to send to {referee_id} after retries")
         
-        # Send to all players
+        # Send to all players with retry logic
         async with httpx.AsyncClient(timeout=10.0) as client:
+            message_payload = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "handle_message",
+                "params": {"message": announcement.to_dict()},
+            }
             for player_id, player_config in self.manager.registered_players.items():
-                try:
-                    await client.post(
-                        player_config.contact_endpoint,
-                        json={
-                            "jsonrpc": "2.0",
-                            "id": 1,
-                            "method": "handle_message",
-                            "params": {"message": announcement.to_dict()},
-                        },
-                    )
+                response = await send_message_with_retry(
+                    client, player_config.contact_endpoint, message_payload, max_retries=3
+                )
+                if response:
                     self.logger.info(f"Sent ROUND_ANNOUNCEMENT to {player_id}")
-                except Exception as e:
-                    self.logger.error(f"Failed to send to {player_id}: {e}")
+                else:
+                    self.logger.error(f"Failed to send to {player_id} after retries")
         
         self.logger.info(f"Round {round_id} announced with {len(matches)} matches")
     
@@ -355,21 +356,22 @@ class MessageHandler:
             standings=standings_data,
         )
         
-        # Send to all players
+        # Send to all players with retry logic
         async with httpx.AsyncClient(timeout=10.0) as client:
+            message_payload = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "handle_message",
+                "params": {"message": message.to_dict()},
+            }
             for player_id, player_config in self.manager.registered_players.items():
-                try:
-                    await client.post(
-                        player_config.contact_endpoint,
-                        json={
-                            "jsonrpc": "2.0",
-                            "id": 1,
-                            "method": "handle_message",
-                            "params": {"message": message.to_dict()},
-                        },
-                    )
-                except Exception as e:
-                    self.logger.error(f"Failed to send standings to {player_id}: {e}")
+                response = await send_message_with_retry(
+                    client, player_config.contact_endpoint, message_payload, max_retries=3
+                )
+                if response:
+                    self.logger.info(f"Sent standings update to {player_id}")
+                else:
+                    self.logger.error(f"Failed to send standings to {player_id} after retries")
     
     async def _check_round_completion(self) -> None:
         """Check if current round is complete and advance if needed."""
@@ -420,21 +422,22 @@ class MessageHandler:
             },
         )
         
-        # Send to all players
+        # Send to all players with retry logic
         async with httpx.AsyncClient(timeout=10.0) as client:
+            message_payload = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "handle_message",
+                "params": {"message": message.to_dict()},
+            }
             for player_id, player_config in self.manager.registered_players.items():
-                try:
-                    await client.post(
-                        player_config.contact_endpoint,
-                        json={
-                            "jsonrpc": "2.0",
-                            "id": 1,
-                            "method": "handle_message",
-                            "params": {"message": message.to_dict()},
-                        },
-                    )
-                except Exception as e:
-                    self.logger.error(f"Failed to send round completed to {player_id}: {e}")
+                response = await send_message_with_retry(
+                    client, player_config.contact_endpoint, message_payload, max_retries=3
+                )
+                if response:
+                    self.logger.info(f"Sent ROUND_COMPLETED to {player_id}")
+                else:
+                    self.logger.error(f"Failed to send ROUND_COMPLETED to {player_id} after retries")
     
     async def _send_league_completed(self) -> None:
         """Send league completed message to all agents."""
@@ -460,20 +463,21 @@ class MessageHandler:
             final_standings=final_standings,
         )
         
-        # Send to all agents
+        # Send to all agents with retry logic
         all_agents = list(self.manager.registered_players.values()) + list(self.manager.registered_referees.values())
         async with httpx.AsyncClient(timeout=10.0) as client:
+            message_payload = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "handle_message",
+                "params": {"message": message.to_dict()},
+            }
             for agent_config in all_agents:
-                try:
-                    await client.post(
-                        agent_config.contact_endpoint,
-                        json={
-                            "jsonrpc": "2.0",
-                            "id": 1,
-                            "method": "handle_message",
-                            "params": {"message": message.to_dict()},
-                        },
-                    )
-                except Exception as e:
-                    self.logger.error(f"Failed to send league completed to {agent_config.agent_id}: {e}")
+                response = await send_message_with_retry(
+                    client, agent_config.contact_endpoint, message_payload, max_retries=3
+                )
+                if response:
+                    self.logger.info(f"Sent LEAGUE_COMPLETED to {agent_config.agent_id}")
+                else:
+                    self.logger.error(f"Failed to send LEAGUE_COMPLETED to {agent_config.agent_id} after retries")
 

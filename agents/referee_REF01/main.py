@@ -123,33 +123,34 @@ class Referee:
             return False
     
     async def send_to_player(self, player_endpoint: str, message: Message) -> Optional[Message]:
-        """Send message to player."""
+        """Send message to player with retry logic."""
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.post(
-                    player_endpoint,
-                    json={
-                        "jsonrpc": "2.0",
-                        "id": 1,
-                        "method": "handle_message",
-                        "params": {"message": message.to_dict()},
-                    },
+                message_payload = {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "handle_message",
+                    "params": {"message": message.to_dict()},
+                }
+                response = await send_message_with_retry(
+                    client, player_endpoint, message_payload, max_retries=3
                 )
-                
-                result = response.json().get("result", {})
-                if "error" in response.json():
-                    self.logger.error(f"Error from player: {response.json()['error']}")
-                    return None
-                
-                return Message.from_dict(result) if result else None
+                if response:
+                    response_data = response.json()
+                    if "error" in response_data:
+                        self.logger.error(f"Error from player: {response_data['error']}")
+                        return None
+                    result = response_data.get("result", {})
+                    return Message.from_dict(result) if result else None
+                return None
         except Exception as e:
-            self.logger.error(f"Error sending to player {player_endpoint}: {e}")
+            self.logger.error(f"Error sending to player {player_endpoint} after retries: {e}")
             return None
     
     async def report_match_result(self, match_id: str, result: Dict) -> None:
-        """Report match result to League Manager."""
+        """Report match result to League Manager with retry logic."""
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 message = create_message(
                     "MATCH_RESULT_REPORT",
                     f"referee:{self.referee_id}",
@@ -160,17 +161,20 @@ class Referee:
                     result=result,
                 )
                 
-                await client.post(
-                    self.league_manager_endpoint,
-                    json={
-                        "jsonrpc": "2.0",
-                        "id": 1,
-                        "method": "handle_message",
-                        "params": {"message": message.to_dict()},
-                    },
-                )
+                message_payload = {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "handle_message",
+                    "params": {"message": message.to_dict()},
+                }
                 
-                self.logger.info(f"Match result reported: {match_id}")
+                response = await send_message_with_retry(
+                    client, self.league_manager_endpoint, message_payload, max_retries=3
+                )
+                if response:
+                    self.logger.info(f"Match result reported: {match_id}")
+                else:
+                    self.logger.error(f"Failed to report match result for {match_id} after retries")
         except Exception as e:
             self.logger.error(f"Error reporting match result: {e}")
     
