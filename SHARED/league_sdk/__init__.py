@@ -27,6 +27,7 @@ from .config_loader import (
     get_config_path,
 )
 from .error_codes import ErrorCode, get_error_description, create_error_message
+from .retry import retry_with_backoff, send_message_with_retry
 
 __all__ = [
     "AgentConfig",
@@ -51,5 +52,7 @@ __all__ = [
     "ErrorCode",
     "get_error_description",
     "create_error_message",
+    "retry_with_backoff",
+    "send_message_with_retry",
 ]
 
