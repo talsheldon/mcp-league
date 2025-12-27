@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "game_types": ["even_odd"],
+  "strategy": "random",
+  "timeouts": {
+    "game_join": 5,
+    "choose_parity": 30
+  }
+}
+

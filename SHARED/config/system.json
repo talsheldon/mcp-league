@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "protocol": "league.v2",
+  "default_timeouts": {
+    "game_join": 5,
+    "choose_parity": 30,
+    "registration": 10,
+    "default": 10
+  },
+  "scoring": {
+    "win": 3,
+    "draw": 1,
+    "loss": 0
+  }
+}
+

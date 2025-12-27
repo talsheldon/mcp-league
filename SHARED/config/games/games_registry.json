@@ -1,0 +1,13 @@
+{
+  "games": {
+    "even_odd": {
+      "name": "Even/Odd",
+      "description": "Players choose even or odd, random number determines winner",
+      "min_number": 1,
+      "max_number": 10,
+      "choice_timeout": 30,
+      "join_timeout": 5
+    }
+  }
+}
+

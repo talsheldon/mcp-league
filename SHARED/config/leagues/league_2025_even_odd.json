@@ -1,0 +1,8 @@
+{
+  "league_id": "league_2025_even_odd",
+  "game_type": "even_odd",
+  "description": "Even/Odd League 2025",
+  "round_robin": true,
+  "scoring_system": "standard"
+}
+
