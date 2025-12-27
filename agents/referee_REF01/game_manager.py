@@ -2,6 +2,8 @@
 
 from typing import Dict, Optional
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
+import json
 import httpx
 from league_sdk import Message, create_message
 from league_sdk.game_logic import EvenOddGame
@@ -10,9 +12,45 @@ from league_sdk.game_logic import EvenOddGame
 class GameManager:
     """Manages game state and flow."""
     
-    def __init__(self, logger):
+    def __init__(self, logger, referee=None):
+        """Initialize GameManager.
+        
+        Args:
+            logger: Logger instance for logging
+            referee: Referee instance for accessing config and state
+        """
         self.logger = logger
+        self.referee = referee
         self.active_games: Dict[str, Dict] = {}
+        self._timeout_config = self._load_timeout_config()
+    
+    def _load_timeout_config(self) -> Dict[str, int]:
+        """Load timeout configuration from system.json.
+        
+        Returns:
+            Dictionary with timeout values in seconds
+        """
+        try:
+            config_path = Path("SHARED/config/system.json")
+            if config_path.exists():
+                with open(config_path, "r") as f:
+                    config = json.load(f)
+                    return config.get("default_timeouts", {
+                        "game_join": 5,
+                        "choose_parity": 30,
+                        "registration": 10,
+                        "default": 10,
+                    })
+        except Exception as e:
+            self.logger.warning(f"Failed to load timeout config: {e}")
+        
+        # Default values
+        return {
+            "game_join": 5,
+            "choose_parity": 30,
+            "registration": 10,
+            "default": 10,
+        }
     
     async def run_game(
         self,
@@ -24,7 +62,25 @@ class GameManager:
         player_A_endpoint: str,
         player_B_endpoint: str,
     ) -> None:
-        """Run a complete game."""
+        """Run a complete game from invitation to result reporting.
+        
+        Args:
+            referee: Referee instance for sending messages and reporting results
+            match_id: Unique identifier for this match
+            round_id: Round number this match belongs to
+            player_A_id: ID of player A
+            player_B_id: ID of player B
+            player_A_endpoint: HTTP endpoint for player A
+            player_B_endpoint: HTTP endpoint for player B
+            
+        The game flow:
+        1. Send game invitations to both players
+        2. Wait for players to join (with timeout)
+        3. Collect parity choices from both players (with deadline)
+        4. Determine winner using EvenOddGame
+        5. Send game results to both players
+        6. Report match result to League Manager
+        """
         try:
             self.logger.info(f"Starting game {match_id}: {player_A_id} vs {player_B_id}")
             
@@ -64,7 +120,8 @@ class GameManager:
                 return
             
             # Step 2: Collect choices
-            deadline = (datetime.now(timezone.utc) + timedelta(seconds=30)).isoformat().replace("+00:00", "Z")
+            timeout_seconds = self._timeout_config.get("choose_parity", 30)
+            deadline = (datetime.now(timezone.utc) + timedelta(seconds=timeout_seconds)).isoformat().replace("+00:00", "Z")
             
             choice_call_A = create_message(
                 "CHOOSE_PARITY_CALL",

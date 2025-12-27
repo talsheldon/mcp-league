@@ -48,7 +48,9 @@ class Referee:
         # State
         self.registered = False
         self.auth_token: Optional[str] = None
-        self.game_manager = GameManager(self.logger)
+        self.max_concurrent_matches: int = 2  # Will be updated from registration response
+        self.active_games: set = set()  # Track active match IDs
+        self.game_manager = GameManager(self.logger, self)
         
         # Message handler
         self.handler = MessageHandler(self)
