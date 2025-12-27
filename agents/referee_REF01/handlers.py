@@ -21,6 +21,14 @@ class MessageHandler:
         # Most communication is initiated by referee
         if message.message_type == "ROUND_ANNOUNCEMENT":
             return await self.handle_round_announcement(message)
+        elif message.message_type == "LEAGUE_COMPLETED":
+            # Acknowledge league completion
+            self.logger.info(f"League {getattr(message, 'league_id', 'unknown')} completed")
+            return create_message(
+                "ACK",
+                f"referee:{self.referee.referee_id}",
+                conversation_id=message.conversation_id,
+            )
         
         raise ValueError(f"Unknown message type: {message.message_type}")
     
