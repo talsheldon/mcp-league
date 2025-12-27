@@ -1,0 +1,9 @@
+{
+  "protocol": "league.v2",
+  "message_type": "START_LEAGUE",
+  "sender": "launcher",
+  "timestamp": "2025-01-15T10:00:00Z",
+  "conversation_id": "conv-start-league",
+  "league_id": "league_2025_even_odd"
+}
+

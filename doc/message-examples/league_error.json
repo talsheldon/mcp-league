@@ -1,0 +1,15 @@
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_ERROR",
+  "sender": "league_manager",
+  "timestamp": "2025-01-15T10:00:00Z",
+  "conversation_id": "conv-error-001",
+  "error_code": "E012",
+  "error_description": "AUTH_TOKEN_INVALID",
+  "original_message_type": "LEAGUE_QUERY",
+  "context": {
+    "provided_token": "tok-invalid-xxx",
+    "expected_format": "tok-{agent_id}-{hash}"
+  }
+}
+

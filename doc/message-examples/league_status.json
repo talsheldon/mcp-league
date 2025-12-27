@@ -1,0 +1,13 @@
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_STATUS",
+  "sender": "league_manager",
+  "timestamp": "2025-01-15T10:00:01Z",
+  "conversation_id": "conv-start-league",
+  "league_id": "league_2025_even_odd",
+  "status": "running",
+  "current_round": 1,
+  "total_rounds": 3,
+  "matches_completed": 0
+}
+
