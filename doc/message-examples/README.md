@@ -10,15 +10,19 @@ This directory contains example JSON messages for the league.v2 protocol.
 
 ### Game Flow Messages
 - `round_announcement.json` - Round announcement with match assignments
-- `game_invitation.json` - Game invitation to players
-- `choose_parity.json` - Parity choice request (CHOOSE_PARITY_CALL)
-- `choose_parity_response.json` - Parity choice response
+- `GAME_INVITATION.json` - Game invitation to players
+- `GAME_JOIN_ACK.json` - Player acceptance of game invitation
+- `CHOOSE_PARITY_CALL.json` - Parity choice request from referee
+- `choose_parity_response.json` - Parity choice response from player
 - `game_over.json` - Game completion message
 - `match_result.json` - Match result report to League Manager
 
 ### League Management Messages
 - `start_league.json` - Start league request
 - `league_status.json` - League status response
+- `ROUND_COMPLETED.json` - Round completion notification
+- `LEAGUE_STANDINGS_UPDATE.json` - Standings update broadcast
+- `LEAGUE_COMPLETED.json` - League completion notification
 - `league_query.json` - League query request
 - `league_query_response.json` - League query response
 - `league_error.json` - Error message example

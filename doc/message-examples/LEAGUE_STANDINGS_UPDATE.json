@@ -1,0 +1,31 @@
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_STANDINGS_UPDATE",
+  "sender": "league_manager",
+  "timestamp": "2025-01-15T10:31:10Z",
+  "conversation_id": "conv-standings-update",
+  "league_id": "league_2025_even_odd",
+  "standings": [
+    {
+      "rank": 1,
+      "player_id": "P01",
+      "display_name": "Player P01",
+      "played": 1,
+      "wins": 1,
+      "draws": 0,
+      "losses": 0,
+      "points": 3
+    },
+    {
+      "rank": 2,
+      "player_id": "P02",
+      "display_name": "Player P02",
+      "played": 1,
+      "wins": 0,
+      "draws": 0,
+      "losses": 1,
+      "points": 0
+    }
+  ]
+}
+

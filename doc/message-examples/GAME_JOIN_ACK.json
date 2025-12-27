@@ -1,0 +1,12 @@
+{
+  "protocol": "league.v2",
+  "message_type": "GAME_JOIN_ACK",
+  "sender": "player:P01",
+  "timestamp": "2025-01-15T10:15:05Z",
+  "conversation_id": "conv-r1m1-invitation",
+  "match_id": "R1M1",
+  "player_id": "P01",
+  "arrival_timestamp": "2025-01-15T10:15:05Z",
+  "accept": true
+}
+
