@@ -83,8 +83,10 @@ You need to run each agent in a **separate terminal window/tab**. The order matt
 #### Step 1: Start League Manager (Start First)
 
 ```bash
-python agents/league_manager/main.py --league-id league_2025_even_odd --port 8000
+PYTHONPATH=. python -m agents.league_manager.main --league-id league_2025_even_odd --port 8000
 ```
+
+> **Note:** Use `python -m` with `PYTHONPATH=.` to ensure imports work correctly. Alternatively, you can run from the project root with `python -m agents.league_manager.main`.
 
 You should see:
 ```
@@ -99,7 +101,7 @@ The League Manager will be available at `http://localhost:8000/mcp` and API docs
 In a **new terminal**:
 
 ```bash
-python agents/referee_REF01/main.py --referee-id REF01 --league-id league_2025_even_odd --port 8001
+PYTHONPATH=. python -m agents.referee_REF01.main --referee-id REF01 --league-id league_2025_even_odd --port 8001
 ```
 
 The referee will automatically register with the League Manager. You should see:
@@ -114,12 +116,12 @@ In **separate terminals** for each player:
 
 **Terminal 3 - Player P01:**
 ```bash
-python agents/player_P01/main.py --player-id P01 --league-id league_2025_even_odd --port 8101
+PYTHONPATH=. python -m agents.player_P01.main --player-id P01 --league-id league_2025_even_odd --port 8101
 ```
 
 **Terminal 4 - Player P02:**
 ```bash
-python agents/player_P01/main.py --player-id P02 --league-id league_2025_even_odd --port 8102
+PYTHONPATH=. python -m agents.player_P01.main --player-id P02 --league-id league_2025_even_odd --port 8102
 ```
 
 > **Note:** You can use the same `player_P01` directory with different `--player-id` and `--port` arguments to run multiple players.
