@@ -15,6 +15,13 @@ class Strategy:
     def choose_parity(self, opponent_id: Optional[str], context: Dict) -> str:
         """Choose parity (even or odd).
         
+        Args:
+            opponent_id: ID of the opponent player, if known
+            context: Additional context including round_id, standings, etc.
+            
+        Returns:
+            "even" or "odd" - the parity choice
+            
         This is a simple random strategy. Can be extended with:
         - History-based analysis
         - Pattern detection

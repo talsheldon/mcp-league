@@ -56,7 +56,14 @@ class MessageHandler:
         )
     
     async def handle_choose_parity(self, message: Message) -> Message:
-        """Handle parity choice request."""
+        """Handle parity choice request from referee.
+        
+        Args:
+            message: CHOOSE_PARITY_CALL message with match_id, context, and deadline
+            
+        Returns:
+            CHOOSE_PARITY_RESPONSE message with the player's parity choice
+        """
         match_id = getattr(message, "match_id")
         context = getattr(message, "context", {})
         opponent_id = context.get("opponent_id")
@@ -78,7 +85,16 @@ class MessageHandler:
         )
     
     async def handle_game_over(self, message: Message) -> Message:
-        """Handle game over message."""
+        """Handle game completion message from referee.
+        
+        Args:
+            message: GAME_OVER message with match_id and game_result
+            
+        Returns:
+            ACK message confirming receipt
+            
+        Records game result in player history and clears current game state.
+        """
         match_id = getattr(message, "match_id")
         game_result = getattr(message, "game_result", {})
         
