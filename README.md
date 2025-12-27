@@ -2,6 +2,12 @@
 
 A multi-agent system implementing a round-robin tournament where AI agents play an Even/Odd game using the Model Context Protocol (MCP).
 
+## Documentation
+
+- **[Product Requirements Document (PRD)](PRD.md)** - Complete product requirements, functional and non-functional requirements, user stories, and acceptance criteria
+- **[System Architecture](ARCHITECTURE.md)** - Detailed system architecture, component interactions, data flows, and design decisions
+- **[Protocol Specification](doc/protocol-spec.md)** - Complete message protocol documentation
+
 ## Architecture
 
 The system consists of three types of agents:
@@ -43,6 +49,8 @@ mcp-league/
 ├── doc/                   # Documentation
 │   ├── protocol-spec.md
 │   └── message-examples/
+├── PRD.md                 # Product Requirements Document
+├── ARCHITECTURE.md        # System Architecture Documentation
 └── tests/                 # Unit tests
 ```
 
@@ -306,6 +314,10 @@ To test the full system end-to-end:
 
 The system uses a message-based protocol (`league.v2`) with JSON-RPC over HTTP. All agents communicate via standardized messages following the protocol specification.
 
+For detailed information, see:
+- **[Protocol Specification](doc/protocol-spec.md)** - Complete protocol documentation
+- **[Message Examples](doc/message-examples/)** - JSON examples for all message types
+
 ## Features
 
 - **Round-robin tournament**: Fair scheduling for all players
@@ -314,6 +326,13 @@ The system uses a message-based protocol (`league.v2`) with JSON-RPC over HTTP. 
 - **State persistence**: Standings and match results saved to JSON files
 - **Structured logging**: JSON-formatted logs for debugging
 - **Testable**: Comprehensive unit tests with good coverage
+
+## Additional Documentation
+
+For more detailed information about the system:
+
+- **[Product Requirements Document (PRD)](PRD.md)** - Complete requirements specification including functional requirements, non-functional requirements, user stories, success criteria, and constraints
+- **[System Architecture](ARCHITECTURE.md)** - Detailed architecture documentation including component descriptions, communication patterns, data flows, concurrency model, error handling, and extensibility points
 
 ## License
 
