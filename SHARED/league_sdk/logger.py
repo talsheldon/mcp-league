@@ -39,7 +39,17 @@ def setup_logger(
     agent_id: Optional[str] = None,
     level: int = logging.INFO,
 ) -> logging.Logger:
-    """Setup structured logger."""
+    """Setup structured JSON logger for an agent.
+    
+    Args:
+        name: Logger name (typically agent type)
+        log_dir: Directory for log files (creates if doesn't exist)
+        agent_id: Optional agent identifier for log entries
+        level: Logging level (default: INFO)
+        
+    Returns:
+        Configured logger instance with JSON file handler and console handler
+    """
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.propagate = False
