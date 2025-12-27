@@ -327,12 +327,28 @@ For detailed information, see:
 - **Structured logging**: JSON-formatted logs for debugging
 - **Testable**: Comprehensive unit tests with good coverage
 
+## Design Decisions
+
+Key architectural decisions made during development:
+
+- **Message-Based Protocol**: JSON-RPC 2.0 over HTTP with custom league.v2 envelope for interoperability and easy debugging
+- **File-Based Persistence**: JSON files for standings and match data - simple, portable, and sufficient for tournament scale
+- **Asyncio for Concurrency**: Python asyncio for I/O-bound operations, enabling efficient concurrent game handling
+- **Shared SDK Architecture**: Common utilities, models, and logic in `league_sdk` for code reuse and consistency
+- **Round-Robin Scheduling**: Fair tournament format where every player plays every other player exactly once
+- **Retry Logic**: Exponential backoff retry (up to 3 attempts) for message delivery reliability
+- **Configuration-Driven**: Timeouts and settings loaded from config files for flexibility
+- **Structured JSON Logging**: Machine-readable logs for debugging and monitoring
+
+For detailed rationale, alternatives considered, and trade-off analysis, see **[Design Decision Records](DESIGN_DECISIONS.md)**.
+
 ## Additional Documentation
 
 For more detailed information about the system:
 
 - **[Product Requirements Document (PRD)](PRD.md)** - Complete requirements specification including functional requirements, non-functional requirements, user stories, success criteria, and constraints
 - **[System Architecture](ARCHITECTURE.md)** - Detailed architecture documentation including component descriptions, communication patterns, data flows, concurrency model, error handling, and extensibility points
+- **[Design Decision Records](DESIGN_DECISIONS.md)** - Detailed ADRs with rationale, alternatives, and consequences
 
 ## License
 
