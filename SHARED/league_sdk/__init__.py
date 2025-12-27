@@ -26,6 +26,7 @@ from .config_loader import (
     load_agents_config,
     get_config_path,
 )
+from .error_codes import ErrorCode, get_error_description, create_error_message
 
 __all__ = [
     "AgentConfig",
@@ -47,5 +48,8 @@ __all__ = [
     "load_agent_defaults",
     "load_agents_config",
     "get_config_path",
+    "ErrorCode",
+    "get_error_description",
+    "create_error_message",
 ]
 
